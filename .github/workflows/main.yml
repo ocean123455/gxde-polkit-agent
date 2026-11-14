@@ -1,0 +1,45 @@
+name: Build DEB on Tag
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build-deb:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add GXDE APT source manually
+        run: |
+          # 1. 下载 GPG 公钥（请根据 GXDE 文档确认实际 URL）
+          sudo curl -fsSLo /etc/apt/trusted.gpg.d/gxde-testing.gpg \
+            https://repo.gxde.top/gxde-os/zhuangzhuang/gxde-testing.gpg
+          
+          # 2. 写入源列表（扁平结构，suite 为 ./）
+          echo "deb [Signed-by=/etc/apt/trusted.gpg.d/gxde-testing.gpg] https://repo.gxde.top/gxde-os/zhuangzhuang ./" | \
+            sudo tee /etc/apt/sources.list.d/gxde-zhuangzhuang.list
+          
+          # 3. 更新索引
+          sudo apt-get update
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential devscripts debhelper fakeroot equivs && sudo DEBIAN_FRONTEND=noninteractive mk-build-deps --install --remove --tool='apt -y' debian/control 
+          # 按需安装其他编译依赖
+
+      - name: Build DEB package
+        run: |
+          # 同方案一，根据项目选择构建命令
+          dpkg-buildpackage -us -uc -b
+          echo "请替换为实际的构建命令"
+
+      - name: Upload DEB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb-package
+          path: |
+            ../*.deb
+            ./*.deb
