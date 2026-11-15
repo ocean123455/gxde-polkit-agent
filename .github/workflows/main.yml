@@ -13,14 +13,12 @@ jobs:
 
       - name: Add GXDE APT source manually
         run: |
-          apt update && apt install curl -y
+          apt update && apt install wget -y
           # 1. 下载 GPG 公钥（请根据 GXDE 文档确认实际 URL）
-          curl -fsSLo /etc/apt/trusted.gpg.d/gxde-testing.gpg \
-            https://repo.gxde.top/gxde-os/zhuangzhuang/Release.gpg 
-          
-          # 2. 写入源列表（扁平结构，suite 为 ./）
-          echo "deb [Signed-by=/etc/apt/trusted.gpg.d/gxde-testing.gpg] https://repo.gxde.top/gxde-os/zhuangzhuang ./" | \
-            tee /etc/apt/sources.list.d/gxde-zhuangzhuang.list
+          wget -O /tmp/gxde-testing-source.deb \
+            https://repo.gxde.top/gxde-os/lizhi/g/gxde-testing-source/gxde-testing-source_1.1.6_all.deb
+
+          apt install /tmp/gxde-testing-source.deb -y
           
           # 3. 更新索引
           apt update
