@@ -1,5 +1,5 @@
 #!/usr/bin/make -f
 
 %:
-	dh $@ --buildsystem=/usr/lib/qt6/bin/qmake6
+	dh $@ --buildsystem=qmake6
 
